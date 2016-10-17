@@ -20,7 +20,7 @@ module NopscApi
   class Application < Rails::Application
     config.middleware.insert_before 0, Rack::Cors do
       allow do
-        origins 'localhost:1313', '127.0.0.1:1313', 'https://nolapsc.org'
+        origins '*'
         resource '*', :headers => :any, :methods => [:get, :post, :options]
       end
     end
