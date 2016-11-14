@@ -1,17 +1,21 @@
 class SignaturesController < ApplicationController
   before_action :set_signature, only: [:show, :update, :destroy]
-
+  before_action :restrict_access, only: [:to_csv]
   # GET /signatures
   def index
-    @signatures = Signature.all.count
+    @signatures = Signature.all.count + 279
 
     render json: @signatures
   end
 
-  # GET /signatures/1
-  def show
-    render json: @signature
+  def to_csv
+    @signatures = Signature.all
+
+    respond_to do |format|
+      format.csv { send_data @signatures.to_csv }
+    end
   end
+
 
   # POST /signatures
   def create
@@ -29,20 +33,6 @@ class SignaturesController < ApplicationController
     end
   end
 
-  # PATCH/PUT /signatures/1
-  def update
-    if @signature.update(signature_params)
-      render json: @signature
-    else
-      render json: @signature.errors, status: :unprocessable_entity
-    end
-  end
-
-  # DELETE /signatures/1
-  def destroy
-    @signature.destroy
-  end
-
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_signature
@@ -53,4 +43,11 @@ class SignaturesController < ApplicationController
     def signature_params
       params.require(:signature).permit(:zip, :name, :mail_opt_in, :email)
     end
+
+
+  def restrict_access
+      api_key = ApiKey.find_by_access_token(params[:access_token])
+      head :unauthorized unless api_key
+  end
+
 end
